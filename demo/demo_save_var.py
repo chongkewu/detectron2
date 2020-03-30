@@ -6,6 +6,7 @@ import os
 import time
 import cv2
 import tqdm
+import pickle
 
 from detectron2.config import get_cfg
 from detectron2.data.detection_utils import read_image
@@ -64,6 +65,7 @@ def get_parser():
         default=[],
         nargs=argparse.REMAINDER,
     )
+    return parser
 
 
 if __name__ == "__main__":
@@ -81,6 +83,7 @@ if __name__ == "__main__":
         if len(args.input) == 1:
             args.input = glob.glob(os.path.expanduser(args.input[0]))
             assert args.input, "The input path(s) was not found"
+        output_var = []
         for path in tqdm.tqdm(args.input, disable=not args.output):
             # use PIL, to be consistent with evaluation
             img = read_image(path, format="BGR")
@@ -95,7 +98,7 @@ if __name__ == "__main__":
                     time.time() - start_time,
                 )
             )
-
+            
             if args.output:
                 if os.path.isdir(args.output):
                     assert os.path.isdir(args.output), args.output
@@ -103,12 +106,24 @@ if __name__ == "__main__":
                 else:
                     assert len(args.input) == 1, "Please specify a directory with args.output"
                     out_filename = args.output
+                #save variable
+                filename = os.path.join(args.output,'detect_result.pickle')
+                frame_id = int(path[-7:-4])
+                pred_classes = predictions["instances"].get_fields()["pred_classes"].cpu().numpy()
+                output_var.append([frame_id, pred_classes])
+                #
                 visualized_output.save(out_filename)
             else:
                 cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
                 cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
                 if cv2.waitKey(0) == 27:
                     break  # esc to quit
+        #save variable
+        output_var = sorted(output_var, key=lambda x: x[0])
+        filename = os.path.join(args.output, 'pred_class.pickle')
+        with open(filename, 'wb') as f:
+            pickle.dump(output_var, f)
+        
     elif args.webcam:
         assert args.input is None, "Cannot have both --input and --webcam!"
         cam = cv2.VideoCapture(0)
