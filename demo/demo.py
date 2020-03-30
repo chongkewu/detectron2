@@ -64,12 +64,6 @@ def get_parser():
         default=[],
         nargs=argparse.REMAINDER,
     )
-    parser.add_argument(
-        '--save-var',
-        type=str, 
-        default='vars', 
-        help='the folder path to save pickle variable')
-    return parser
 
 
 if __name__ == "__main__":
