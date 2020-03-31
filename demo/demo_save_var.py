@@ -12,7 +12,7 @@ from detectron2.config import get_cfg
 from detectron2.data.detection_utils import read_image
 from detectron2.utils.logger import setup_logger
 
-from predictor import VisualizationDemo
+from predictor_save_var import VisualizationDemoSaveVar
 
 # constants
 WINDOW_NAME = "COCO detections"
@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
     cfg = setup_cfg(args)
 
-    demo = VisualizationDemo(cfg)
+    demo = VisualizationDemoSaveVar(cfg)
 
     if args.input:
         if len(args.input) == 1:
